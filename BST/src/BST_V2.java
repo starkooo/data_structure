@@ -1,6 +1,6 @@
 import org.w3c.dom.NodeList;
 
-import java.util.Stack;
+import java.util.*;
 
 public class BST_V2<E extends Comparable<E>> {
 
@@ -124,6 +124,127 @@ public class BST_V2<E extends Comparable<E>> {
         System.out.println(node.e);
     }
 
+    public void levelOrder(){
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        while (!q.isEmpty()){
+            Node cur = q.remove();
+            System.out.println(cur.e);
+
+            if(cur.left != null)
+                q.add(cur.left);
+            if(cur.right != null)
+                q.add(cur.right);
+        }
+    }
+
+    public E minimum(){
+        if (size == 0)
+            throw new IllegalArgumentException("BST is empty");
+
+        return minimum(root).e;
+    }
+
+    //返回以Nod e为根的BST的最小值所在的节点
+    private Node minimum(Node node) {
+        if (node.left == null)
+            return node;
+        return minimum(node.left);
+    }
+
+    public E maximum(){
+        if (size == 0)
+            throw new IllegalArgumentException("BST is empty");
+        return maximum(root).e;
+    }
+
+    private Node maximum(Node node) {
+        if (node.right == null)
+            return node;
+
+        return maximum(node.right);
+    }
+
+    public E removeMin(){
+        E ret = minimum();
+        root = removeMin(root);
+
+        return ret;
+    }
+
+    //删除以node为根的BST中的最小节点
+    //返回删除节点后新的BST的根
+    private Node removeMin(Node node) {
+
+        if (node.left == null){
+            Node rightNode = node.right;
+            node.right = null;
+            size --;
+            return rightNode;
+        }
+
+        node.left = removeMin(node.left);
+        return node;
+    }
+
+    public E removeMax(){
+        E ret = maximum();
+        root = removeMax(root);
+        return ret;
+    }
+
+    private Node removeMax(Node node){
+        if (node.right == null){
+            Node leftNode = node.left;
+            node.left = null;
+            size --;
+            return leftNode;
+        }
+
+        node.right = removeMax(node.right);
+        return node;
+    }
+
+    public void remove(E e){
+        root = remove(root,e);
+    }
+
+    //删除以node为根节点的BST中值为e的点
+    //返回删除节点后新的BST的根
+    private Node remove(Node node, E e) {
+        if (node == null)
+            return null;
+        if (e.compareTo(node.e) < 0){
+            node.left = remove(node.left,e);
+            return node;
+        }else if (e.compareTo(node.e) > 0){
+            node.right = remove(node.right,e);
+            return node;
+        }else {  //e == node.e
+            if (node.left == null){
+                Node rightNode = node.right;
+                node.right = null;
+                size --;
+                return rightNode;
+            }
+
+            if (node.right == null){
+                Node leftNode = node.left;
+                node.left = null;
+                size --;
+                return leftNode;
+            }
+
+            //待删除元素左右子树均不为空
+            Node successor = minimum(node.right);
+            successor.right = removeMin(node.right);
+            successor.left = node.left;
+
+            node.left = node.right = null;
+            return successor;
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder();
@@ -148,5 +269,27 @@ public class BST_V2<E extends Comparable<E>> {
             res.append("--");
         }
         return res.toString();
+    }
+
+    public static void main(String[] args) {
+        BST_V2<Integer> bst = new BST_V2<>();
+        Random random = new Random();
+
+        int n = 1000;
+        for (int i = 0; i < n; i++) {
+            bst.add(random.nextInt(10000));
+        }
+
+        ArrayList<Integer> nums = new ArrayList<>();
+        while (!bst.isEmpty())
+            nums.add(bst.removeMin());
+
+        System.out.println(nums);
+
+        for (int i = 1; i < nums.size(); i++) {
+            if (nums.get(i - 1) > nums.get(i))
+                throw new IllegalArgumentException("Error");
+        }
+        System.out.println("removeMin successed");
     }
 }
